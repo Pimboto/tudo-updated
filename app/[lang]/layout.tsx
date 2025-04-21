@@ -11,6 +11,15 @@ export async function generateMetadata({ params }: { params: { lang: string } })
   return {
     title: "TUDO - No strings. just joy.",
     description: "Your all-access pass to fitness, wellness & beauty",
+    icons: {
+      icon: [
+        { url: '/favicon.ico' },
+        { url: '/icon.png' },
+      ],
+      apple: [
+        { url: '/apple-icon.png' },
+      ],
+    },
   }
 }
 

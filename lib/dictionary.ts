@@ -5,25 +5,7 @@ import type { Locale } from "@/middleware";
 // Definimos el tipo para nuestros diccionarios
 export type Dictionary = {
 
-   
-  footer: {
-    description: string;
-    companyHeading: string;
-    aboutUs: string;
-    careers: string;
-    partners: string;
-    press: string;
-    resourcesHeading: string;
-    blog: string;
-    helpCenter: string;
-    faq: string;
-    contactUs: string;
-    legalHeading: string;
-    terms: string;
-    privacy: string;
-    cookies: string;
-    copyright: string; // Use {year} as a placeholder for the current year
-  }
+  
 
 
   ctaSection: {
