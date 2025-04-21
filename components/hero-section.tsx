@@ -58,13 +58,13 @@ export default function HeroSection({ lang, dictionary }: HeroSectionProps) {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href={`/${lang}/book`}
+                href={`/${lang}/search`}
                 className="bg-white text-black px-8 py-3 text-center font-medium hover:bg-gray-200 transition-colors"
               >
                 {dictionary.bookClass}
               </Link>
               <Link
-                href={`/${lang}/start`}
+                href={`/${lang}/search`}
                 className="bg-transparent border border-white text-white px-8 py-3 text-center font-medium hover:bg-white/10 transition-colors"
               >
                 {dictionary.startHere}
