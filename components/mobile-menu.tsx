@@ -8,6 +8,7 @@ import LanguageSwitcher from "./language-switcher"
 import type { Dictionary } from "@/lib/dictionary"
 import type { Locale } from "@/middleware"
 import { createPortal } from "react-dom"
+import { useRouter } from "next/navigation"
 
 interface MobileMenuProps {
   lang: Locale
@@ -18,6 +19,7 @@ interface MobileMenuProps {
 export default function MobileMenu({ lang, dictionary, variant = "dark" }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
   // Determinar el color del texto basado en la variante
   const textColor = variant === "dark" ? "text-white" : "text-gray-800"
@@ -72,9 +74,31 @@ export default function MobileMenu({ lang, dictionary, variant = "dark" }: Mobil
               <Link href={`/${lang}/business`} className="text-white text-lg" onClick={() => setIsOpen(false)}>
                 {dictionary.business}
               </Link>
-              <div className="flex items-center">
-                <LanguageSwitcher className="text-lg" currentLang={lang} variant="dark" />
+              
+              {/* Botón de cambio de idioma simplificado */}
+              <div className="flex items-center gap-2">
+                <LanguageSwitcher 
+                  className="text-lg" 
+                  currentLang={lang} 
+                  variant="dark"
+                  isMobile={true}
+                />
+                <span 
+                  className="text-white text-lg cursor-pointer" 
+                  onClick={() => {
+                    const newLang = lang === "en" ? "es" : "en";
+                    // Cierra el menú
+                    setIsOpen(false);
+                    // Pequeño tiempo para que se cierre el menú antes de cambiar de idioma
+                    setTimeout(() => {
+                      router.push(`/${newLang}${window.location.pathname.substring(3)}`);
+                    }, 100);
+                  }}
+                >
+                  {lang === "en" ? "English" : "Español"}
+                </span>
               </div>
+              
               <Link href={`/${lang}/login`} className="text-white text-lg" onClick={() => setIsOpen(false)}>
                 {dictionary.login}
               </Link>
