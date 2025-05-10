@@ -68,28 +68,30 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
   };
 
   const handleGoogleSignUp = async () => {
-    if (!signUp) return;
+    if (!signIn) return;
     try {
-      return await signUp.authenticateWithRedirect({
+      return await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: `/${lang}/sso-callback`,
         redirectUrlComplete: `/${lang}`,
       });
     } catch (err) {
       console.error("Error with Google sign up:", err);
+      setError("Error with Google sign up. Please try again.");
     }
   };
 
   const handleAppleSignUp = async () => {
-    if (!signUp) return;
+    if (!signIn) return;
     try {
-      return await signUp.authenticateWithRedirect({
+      return await signIn.authenticateWithRedirect({
         strategy: "oauth_apple",
         redirectUrl: `/${lang}/sso-callback`,
         redirectUrlComplete: `/${lang}`,
       });
     } catch (err) {
       console.error("Error with Apple sign up:", err);
+      setError("Error with Apple sign up. Please try again.");
     }
   };
 
@@ -111,7 +113,8 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "An error occurred");
+      console.error("Error during signup:", err);
+      setError(err.errors?.[0]?.message || "An error occurred during signup");
     } finally {
       setLoading(false);
     }
@@ -131,10 +134,14 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
+        // Redirect immediately after successful verification
         router.push(`/${lang}`);
+      } else {
+        setError("Verification incomplete. Please try again.");
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid code");
+      console.error("Error during verification:", err);
+      setError(err.errors?.[0]?.message || "Invalid verification code");
     } finally {
       setLoading(false);
     }
@@ -299,7 +306,7 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
                       </label>
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Loading..." : dict.register.signUpButton}
+                      {loading ? "Creating account..." : dict.register.signUpButton}
                     </Button>
                   </div>
                 </form>

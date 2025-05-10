@@ -4,8 +4,9 @@ import type { Locale } from "@/middleware";
 import type { Metadata } from "next";
 import SearchClient from "./client";
 
-export async function generateMetadata({ params }: { params: { lang: Locale } }): Promise<Metadata> {
-  const dict = await getDictionary(params.lang);
+export async function generateMetadata({ params }: { params: Promise<{ lang: Locale }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const dict = await getDictionary(lang);
   
   return {
     title: dict.searchClasses?.meta?.title || "Search Classes",
@@ -13,10 +14,9 @@ export async function generateMetadata({ params }: { params: { lang: Locale } })
   };
 }
 
-export default async function SearchPage({ params }: { params: { lang: Locale } }) {
-  // Cargar el diccionario en el lado del servidor
-  const dictionary = await getDictionary(params.lang);
+export default async function SearchPage({ params }: { params: Promise<{ lang: Locale }> }) {
+  const { lang } = await params;
+  const dictionary = await getDictionary(lang);
   
-  // Renderizar el componente cliente con las props necesarias
-  return <SearchClient params={params} dictionary={dictionary} />;
+  return <SearchClient params={{ lang }} dictionary={dictionary} />;
 }

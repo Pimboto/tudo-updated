@@ -9,6 +9,7 @@ import LanguageSwitcher from "./language-switcher"
 import type { Dictionary } from "@/lib/dictionary"
 import type { Locale } from "@/middleware"
 import { usePathname } from "next/navigation"
+import { useUser, SignInButton, UserButton } from "@clerk/nextjs"
 
 interface NavbarProps {
   lang?: Locale
@@ -26,6 +27,7 @@ export default function Navbar({
   const pathname = usePathname()
   // Extraer el idioma del pathname si no se proporciona como prop
   const currentLang = lang || (pathname?.split("/")[1] as Locale) || "en"
+  const { isSignedIn, user, isLoaded } = useUser()
 
   const [scrolled, setScrolled] = useState(false)
 
@@ -93,6 +95,10 @@ export default function Navbar({
   // Determinar qué logo usar basado en la variante
   const logoSrc = variant === "dark" ? "/images/logo-white.png" : "/images/logo-dark.png"
 
+  if (!isLoaded) {
+    return null
+  }
+
   return (
     <header className={getNavbarClasses()}>
       <nav className="flex justify-between items-center max-w-7xl mx-auto">
@@ -121,15 +127,31 @@ export default function Navbar({
             {navDict.business}
           </Link>
           <LanguageSwitcher currentLang={currentLang} variant={variant} />
-          <Link href={`/${currentLang}/login`} className={`${textColor} ${hoverTextColor} transition-colors`}>
-            {navDict.login}
-          </Link>
-          <Link
-            href={`/${currentLang}/signup`}
-            className={`${buttonBgColor} px-4 py-2 rounded-md transition-colors flex items-center justify-center h-9`}
-          >
-            {navDict.signup}
-          </Link>
+          
+          {isSignedIn ? (
+            <UserButton 
+              afterSignOutUrl={`/${currentLang}`}
+              appearance={{
+                elements: {
+                  avatarBox: "h-9 w-9",
+                  userButtonBox: "h-9 w-9",
+                  userButtonPopoverCard: "z-[9999]",
+                }
+              }}
+            />
+          ) : (
+            <>
+              <Link href={`/${currentLang}/login`} className={`${textColor} ${hoverTextColor} transition-colors`}>
+                {navDict.login}
+              </Link>
+              <Link
+                href={`/${currentLang}/signup`}
+                className={`${buttonBgColor} px-4 py-2 rounded-md transition-colors flex items-center justify-center h-9`}
+              >
+                {navDict.signup}
+              </Link>
+            </>
+          )}
         </div>
         <MobileMenu lang={currentLang} dictionary={navDict} variant={variant} />
       </nav>
