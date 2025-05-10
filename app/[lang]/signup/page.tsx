@@ -1,4 +1,4 @@
-//app\[lang]\signup\page.tsx
+// app/[lang]/signup/page.tsx
 "use client"
 
 import Link from "next/link";
@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSignUp, useSignIn } from "@clerk/nextjs";
+import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Locale } from "@/middleware";
@@ -27,7 +27,6 @@ interface RegisterPageProps {
 export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
   const router = useRouter();
   const { signUp, setActive, isLoaded } = useSignUp();
-  const { signIn } = useSignIn();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,6 +35,10 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
+
+  console.log("🔍 RegisterPage rendered with lang:", lang);
+  console.log("🔍 signUp object:", signUp);
+  console.log("🔍 isLoaded:", isLoaded);
 
   // Get dictionary statically or use default values
   const dict = {
@@ -68,53 +71,109 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
   };
 
   const handleGoogleSignUp = async () => {
-    if (!signIn) return;
+    console.log("🔍 Starting Google signup...");
+    console.log("🔍 signUp object:", signUp);
+    
+    if (!signUp) {
+      console.error("❌ signUp is null");
+      return;
+    }
+    
     try {
-      return await signIn.authenticateWithRedirect({
+      console.log("🔄 Redirecting to Google...");
+      const result = await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: `/${lang}/sso-callback`,
         redirectUrlComplete: `/${lang}`,
       });
+      console.log("✅ Google redirect result:", result);
     } catch (err) {
-      console.error("Error with Google sign up:", err);
+      console.error("❌ Google signup error:", err);
+      console.error("❌ Error details:", JSON.stringify(err, null, 2));
       setError("Error with Google sign up. Please try again.");
     }
   };
 
   const handleAppleSignUp = async () => {
-    if (!signIn) return;
+    console.log("🔍 Starting Apple signup...");
+    console.log("🔍 signUp object:", signUp);
+    
+    if (!signUp) {
+      console.error("❌ signUp is null");
+      return;
+    }
+    
     try {
-      return await signIn.authenticateWithRedirect({
+      console.log("🔄 Redirecting to Apple...");
+      const result = await signUp.authenticateWithRedirect({
         strategy: "oauth_apple",
         redirectUrl: `/${lang}/sso-callback`,
         redirectUrlComplete: `/${lang}`,
       });
+      console.log("✅ Apple redirect result:", result);
     } catch (err) {
-      console.error("Error with Apple sign up:", err);
+      console.error("❌ Apple signup error:", err);
+      console.error("❌ Error details:", JSON.stringify(err, null, 2));
       setError("Error with Apple sign up. Please try again.");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signUp || !isLoaded) return;
+    console.log("🚀 Starting signup process...");
+    console.log("🔍 signUp object:", signUp);
+    console.log("🔍 isLoaded:", isLoaded);
+    
+    if (!signUp || !isLoaded) {
+      console.error("❌ signUp or isLoaded is false");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      await signUp.create({
+      console.log("📝 Creating user with data:", {
+        firstName,
+        lastName,
+        emailAddress: email,
+        password: "***"
+      });
+      
+      const result = await signUp.create({
         firstName,
         lastName,
         emailAddress: email,
         password,
       });
-
+      
+      console.log("✅ User created successfully:", result);
+      console.log("📧 Preparing email verification...");
+      
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      
+      console.log("✅ Email verification prepared");
       setPendingVerification(true);
     } catch (err: any) {
-      console.error("Error during signup:", err);
-      setError(err.errors?.[0]?.message || "An error occurred during signup");
+      console.error("❌ Error during signup:", err);
+      console.error("❌ Error details:", JSON.stringify(err, null, 2));
+      
+      // Manejar errores específicos
+      if (err.errors && err.errors[0]) {
+        const error = err.errors[0];
+        console.error("❌ Specific error:", error);
+        if (error.code === 'form_identifier_exists') {
+          setError('This email is already registered. Please sign in instead.');
+        } else if (error.code === 'form_password_pwned') {
+          setError('This password is too weak. Please choose a stronger password.');
+        } else if (error.code === 'form_password_validation_failed') {
+          setError('Password must be at least 8 characters long.');
+        } else {
+          setError(error.message || "An error occurred during signup");
+        }
+      } else {
+        setError("An error occurred during signup");
+      }
     } finally {
       setLoading(false);
     }
@@ -122,26 +181,77 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
 
   const onPressVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signUp || !isLoaded) return;
+    console.log("🔐 Starting verification process...");
+    console.log("🔍 Verification code:", verificationCode);
+    
+    if (!signUp || !isLoaded) {
+      console.error("❌ signUp or isLoaded is false");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
+      console.log("🔒 Attempting email verification...");
+      
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: verificationCode,
       });
-
+      
+      console.log("✅ Verification result:", completeSignUp);
+      console.log("📊 Status:", completeSignUp.status);
+      
       if (completeSignUp.status === "complete") {
+        console.log("🎉 Verification successful!");
+        console.log("🔑 Session ID:", completeSignUp.createdSessionId);
+        
         await setActive({ session: completeSignUp.createdSessionId });
-        // Redirect immediately after successful verification
+        console.log("✅ Session activated");
+        
         router.push(`/${lang}`);
       } else {
+        console.warn("⚠️ Verification not complete, status:", completeSignUp.status);
+        console.warn("⚠️ Complete object:", completeSignUp);
         setError("Verification incomplete. Please try again.");
       }
     } catch (err: any) {
-      console.error("Error during verification:", err);
-      setError(err.errors?.[0]?.message || "Invalid verification code");
+      console.error("❌ Error during verification:", err);
+      console.error("❌ Error details:", JSON.stringify(err, null, 2));
+      
+      if (err.errors && err.errors[0]) {
+        const error = err.errors[0];
+        console.error("❌ Specific error:", error);
+        if (error.code === 'verification_failed') {
+          setError('Incorrect verification code. Please try again.');
+        } else if (error.code === 'verification_expired') {
+          setError('Verification code expired. Please request a new one.');
+        } else {
+          setError(error.message || "Invalid verification code");
+        }
+      } else {
+        setError("Invalid verification code");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para reenviar código de verificación
+  const resendVerificationCode = async () => {
+    if (!signUp) return;
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      console.log("📧 Resending verification code...");
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setError("New verification code sent to your email.");
+      console.log("✅ Verification code resent");
+    } catch (err) {
+      console.error("❌ Failed to resend code:", err);
+      setError("Failed to resend verification code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -281,6 +391,7 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required 
+                        minLength={8}
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -338,6 +449,17 @@ export default function RegisterPage({ params: { lang } }: RegisterPageProps) {
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Verifying..." : dict.register.verify}
+                  </Button>
+                  
+                  {/* Reenviar código */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={resendVerificationCode}
+                    disabled={loading}
+                  >
+                    Resend code
                   </Button>
                 </div>
               </form>

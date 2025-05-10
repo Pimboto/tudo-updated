@@ -303,3 +303,23 @@ video {
 [role="menu"] {
   z-index: 9999 !important;
 }
+
+/* Estilos para el UserButton de Clerk */
+.cl-userButton-root {
+  display: inline-flex;
+}
+
+.cl-userButton-trigger {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.cl-avatarBox {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* Asegurar que los popups del UserButton aparezcan arriba del navbar */
+.cl-userButton-popover {
+  z-index: 9999 !important;
+}

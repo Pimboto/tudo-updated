@@ -1,4 +1,4 @@
-//app\[lang]\layout.tsx
+// app/[lang]/layout.tsx
 import type React from "react"
 import "../globals.css"
 import type { Metadata } from "next"
@@ -39,13 +39,16 @@ export default async function RootLayout({
 }) {
   const { lang } = await params;
   
+  console.log("🔧 Layout rendering with lang:", lang);
+  console.log("🔑 Clerk keys check:", {
+    publishable: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "✅ Set" : "❌ Missing",
+    secret: process.env.CLERK_SECRET_KEY ? "✅ Set" : "❌ Missing"
+  });
+  
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={inter.className}>
-        <ClerkProvider 
-          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
-          clerkJSVariant="headless"
-        >
+        <ClerkProvider>
           {children}
         </ClerkProvider>
       </body>
