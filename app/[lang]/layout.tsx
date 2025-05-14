@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { locales } from "@/middleware"
 import { ClerkProvider } from '@clerk/nextjs'
+import MultisessionAppSupport from "@/components/MultisessionAppSupport"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -48,8 +49,15 @@ export default async function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <body className={inter.className}>
-        <ClerkProvider>
-          {children}
+        <ClerkProvider
+          afterMultiSessionSingleSignOutUrl={`/${lang}`}
+          appearance={{
+            // Add supported appearance options here if needed
+          }}
+        >
+          <MultisessionAppSupport>
+            {children}
+          </MultisessionAppSupport>
         </ClerkProvider>
       </body>
     </html>
