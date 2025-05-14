@@ -68,6 +68,7 @@ export default function Navbar({
     pricing: "Pricing",
     about: "About",
     business: "Business",
+    hello: "Hello",
     login: "Login",
     signup: "Sign Up",
   };
@@ -188,7 +189,8 @@ export default function Navbar({
               {/* Mensaje de bienvenida opcional */}
               {user?.firstName && (
                 <span className={`${textColor} hidden lg:block`}>
-                  Hello, {user.firstName}!
+                  {navDict.hello?.replace("{name}", user.firstName) ||
+                    `Hello, ${user.firstName}!`}
                 </span>
               )}
               <UserButton

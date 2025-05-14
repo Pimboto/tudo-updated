@@ -67,11 +67,11 @@ export default function MobileMenu({
         createPortal(
           <div
             className="fixed inset-0 bg-black/80 md:hidden"
-            style={{ zIndex: 99999999 }}
+            style={{ zIndex: 1000  }}
           >
             <div
               className="fixed top-0 right-0 bottom-0 w-[250px] bg-black p-6 flex flex-col"
-              style={{ zIndex: 99999999 }}
+              style={{ zIndex: 1000  }}
             >
               <div className="flex justify-end">
                 <button
@@ -143,7 +143,10 @@ export default function MobileMenu({
                     <div className="flex flex-col space-y-4">
                       {user?.firstName && (
                         <span className="text-white text-lg">
-                          Hello, {user.firstName}!
+                          {dictionary.hello?.replace(
+                            "{name}",
+                            user.firstName
+                          ) || `Hello, ${user.firstName}!`}
                         </span>
                       )}
                       <div className="flex justify-start">
@@ -153,14 +156,19 @@ export default function MobileMenu({
                             elements: {
                               avatarBox: "h-9 w-9",
                               userButtonBox: "h-9 w-9",
-                              userButtonPopoverCard: "z-[99999]",
-                              userButtonPopoverActions: "z-[99999]",
+                              // Aumenta estos valores a un número mucho mayor
+                              userButtonPopoverCard: "z-[999999]",
+                              userButtonPopoverActions: "z-[999999]",
+                              // Agrega estos nuevos elementos para cubrir todos los aspectos del popover
+                              userButtonPopover: "z-[999999]",
+                              userButtonPopoverFooter: "z-[999999]",
+                              userButtonPopoverRootBox: "z-[999999]",
                             },
                             variables: {
                               colorPrimary: "#FF9422",
                             },
                           }}
-                          userProfileMode="modal" // Cambio principal aquí
+                          userProfileMode="modal"
                         />
                       </div>
                     </div>
